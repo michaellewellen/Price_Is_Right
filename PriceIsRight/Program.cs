@@ -1,9 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
-
+builder.Services.AddDbContext<PriceIsRightContext>(options =>
+    options.UseSqlite("Data Source=priceisright.db")); 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,5 +28,11 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<PriceIsRightContext>();
+    SeedData.Initialize(context);
+}
 
 app.Run();
